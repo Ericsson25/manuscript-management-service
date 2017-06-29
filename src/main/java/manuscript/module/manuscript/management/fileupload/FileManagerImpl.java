@@ -18,6 +18,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import manuscript.module.manuscript.management.exception.CheckSubmissionExistenceException;
 import manuscript.system.security.bean.AuthenticatedUser;
 
 @Service
@@ -117,5 +118,14 @@ public class FileManagerImpl implements FileManager {
 		if (file.delete()) {
 			LOGGER.debug("File from {} path has been deleted", file);
 		}
+	}
+
+	@Override
+	public void checkFileExistenceOnFileSystem(String path) {
+		LOGGER.debug("Check file existence on path: ", path);
+		if (!Files.exists(Paths.get(path))) {
+			throw new CheckSubmissionExistenceException("File is not existing on the file system.");
+		}
+
 	}
 }

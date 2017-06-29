@@ -8,16 +8,20 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import manuscript.module.manuscript.management.bean.CheckSubmissionExistence;
 import manuscript.module.manuscript.management.bean.Role;
 import manuscript.module.manuscript.management.bean.SubmissionStatus;
 import manuscript.module.manuscript.management.exception.FileUploadException;
+import manuscript.module.manuscript.management.exception.SaveSubmissionException;
 import manuscript.module.manuscript.management.fileupload.FileManager;
 import manuscript.module.manuscript.management.preload.reply.ManuscriptPreloadReply;
+import manuscript.module.manuscript.management.request.SaveSubmissionDataRequest;
 import manuscript.module.manuscript.management.request.SaveSubmissionRequest;
 import manuscript.module.manuscript.management.response.AuthorPreloadResponse;
 import manuscript.module.manuscript.management.response.EditorPreloadResponse;
 import manuscript.module.manuscript.management.response.FileUploadResponse;
 import manuscript.module.manuscript.management.response.ReviewerPreloadResponse;
+import manuscript.module.manuscript.management.response.SaveSubmissionDataResponse;
 import manuscript.system.security.bean.AuthenticatedUser;
 
 @Service
@@ -105,6 +109,37 @@ public class ManuscriptServiceImpl implements ManuscriptService {
 
 	private String generateSubmissionId(String path) {
 		return ((path.substring(path.lastIndexOf("\\") + 1, path.lastIndexOf("."))));
+	}
+
+	@Override
+	public SaveSubmissionDataResponse save(SaveSubmissionDataRequest submission) {
+		checkSubmissionExistence(submission);
+
+		try {
+			manuscriptDao.saveSubmissionData(submission);
+		} catch (Exception e) {
+			LOGGER.debug("Exception occurred durin save submission. Exception {}", e);
+			throw new SaveSubmissionException("Can't save submission. Please try again later.");
+		}
+		SaveSubmissionDataResponse response = new SaveSubmissionDataResponse();
+
+		response.setSuccessMessage("Your modifications have been saved succesfully.");
+
+		// Kell hogy visszaadja az új, lementett manuscriptet???
+		response.setSubmission((manuscriptDao.getSubmissionData(submission.getSubmission().getSubmissionId())).getSubmission());
+		return response;
+	}
+
+	private void checkSubmissionExistence(SaveSubmissionDataRequest submission) {
+		CheckSubmissionExistence checkSubmissionExistence = new CheckSubmissionExistence();
+		checkSubmissionExistence.setSubmissionId(submission.getSubmission().getSubmissionId());
+		checkSubmissionExistence.setSubmitterId(submission.getSubmission().getSubmitter());
+
+		String path = manuscriptDao.checkSubmissionExistence(checkSubmissionExistence);
+
+		fileManager.checkFileExistenceOnFileSystem(path);
+		LOGGER.debug("File is existing on path: ", path);
+
 	}
 
 }
