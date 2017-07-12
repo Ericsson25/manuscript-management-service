@@ -10,10 +10,16 @@ import manuscript.module.manuscript.management.ManuscriptService;
 import manuscript.module.manuscript.management.bean.Role;
 import manuscript.module.manuscript.management.exception.FileValidationException;
 import manuscript.module.manuscript.management.preload.reply.ManuscriptPreloadReply;
+import manuscript.module.manuscript.management.request.RemoveSubmissionRequest;
 import manuscript.module.manuscript.management.request.SaveSubmissionDataRequest;
+import manuscript.module.manuscript.management.request.SearchAuthorRequest;
+import manuscript.module.manuscript.management.request.SubmitSubmissionRequest;
 import manuscript.module.manuscript.management.response.AuthorPreloadResponse;
 import manuscript.module.manuscript.management.response.FileUploadResponse;
+import manuscript.module.manuscript.management.response.RemoveSubmissionResponse;
 import manuscript.module.manuscript.management.response.SaveSubmissionDataResponse;
+import manuscript.module.manuscript.management.response.SearchAuthorResponse;
+import manuscript.module.manuscript.management.response.SubmitSubmissionResponse;
 
 @RestController
 @RequestMapping("/author")
@@ -47,6 +53,21 @@ public class AuthorController {
 	@RequestMapping("/submission/save")
 	public SaveSubmissionDataResponse save(@RequestBody SaveSubmissionDataRequest submission) {
 		return manuscriptService.save(submission);
+	}
+
+	@RequestMapping("/submission/remove")
+	public RemoveSubmissionResponse save(@RequestBody RemoveSubmissionRequest request) {
+		return manuscriptService.remove(request);
+	}
+
+	@RequestMapping("/submission/searchauthor")
+	public SearchAuthorResponse searchAuthor(SearchAuthorRequest request) {
+		return null;
+	}
+
+	@RequestMapping("/submission/submit")
+	public SubmitSubmissionResponse save(@RequestBody SubmitSubmissionRequest request) {
+		return null;
 	}
 
 }

@@ -15,11 +15,13 @@ import manuscript.module.manuscript.management.exception.FileUploadException;
 import manuscript.module.manuscript.management.exception.SaveSubmissionException;
 import manuscript.module.manuscript.management.fileupload.FileManager;
 import manuscript.module.manuscript.management.preload.reply.ManuscriptPreloadReply;
+import manuscript.module.manuscript.management.request.RemoveSubmissionRequest;
 import manuscript.module.manuscript.management.request.SaveSubmissionDataRequest;
 import manuscript.module.manuscript.management.request.SaveSubmissionRequest;
 import manuscript.module.manuscript.management.response.AuthorPreloadResponse;
 import manuscript.module.manuscript.management.response.EditorPreloadResponse;
 import manuscript.module.manuscript.management.response.FileUploadResponse;
+import manuscript.module.manuscript.management.response.RemoveSubmissionResponse;
 import manuscript.module.manuscript.management.response.ReviewerPreloadResponse;
 import manuscript.module.manuscript.management.response.SaveSubmissionDataResponse;
 import manuscript.system.security.bean.AuthenticatedUser;
@@ -140,6 +142,23 @@ public class ManuscriptServiceImpl implements ManuscriptService {
 		fileManager.checkFileExistenceOnFileSystem(path);
 		LOGGER.debug("File is existing on path: ", path);
 
+	}
+
+	@Override
+	public RemoveSubmissionResponse remove(RemoveSubmissionRequest request) {
+		RemoveSubmissionResponse response = new RemoveSubmissionResponse();
+
+		try {
+			String submissionFilePath = manuscriptDao.removeSubmissionData(request);
+
+			if (submissionFilePath != null || !submissionFilePath.isEmpty()) {
+				fileManager.deleteFile(new File(submissionFilePath));
+			}
+		} catch (Exception e) {
+			response.setExceptionMessage("Can't remove submission. Please try again later");
+		}
+		response.setSuccessMessage("Your submission has been deleted succesfully.");
+		return response;
 	}
 
 }
