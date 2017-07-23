@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import manuscript.module.manuscript.management.ManuscriptService;
-import manuscript.module.manuscript.management.bean.Role;
 import manuscript.module.manuscript.management.exception.FileValidationException;
 import manuscript.module.manuscript.management.preload.reply.ManuscriptPreloadReply;
 import manuscript.module.manuscript.management.request.RemoveSubmissionRequest;
@@ -20,6 +19,7 @@ import manuscript.module.manuscript.management.response.RemoveSubmissionResponse
 import manuscript.module.manuscript.management.response.SaveSubmissionDataResponse;
 import manuscript.module.manuscript.management.response.SearchAuthorResponse;
 import manuscript.module.manuscript.management.response.SubmitSubmissionResponse;
+import manuscript.module.user.management.bean.Roles;
 
 @RestController
 @RequestMapping("/author")
@@ -33,7 +33,7 @@ public class AuthorController {
 
 	@RequestMapping("/submission/preload")
 	public AuthorPreloadResponse preload() {
-		ManuscriptPreloadReply<?> response = manuscriptService.preload(Role.AUTHOR_ROLE);
+		ManuscriptPreloadReply<?> response = manuscriptService.preload(Roles.AUTHOR_ROLE);
 
 		if (response.getPreloadReply() instanceof AuthorPreloadResponse) {
 			return (AuthorPreloadResponse) response.getPreloadReply();
@@ -62,12 +62,12 @@ public class AuthorController {
 
 	@RequestMapping("/submission/searchauthor")
 	public SearchAuthorResponse searchAuthor(SearchAuthorRequest request) {
-		return null;
+		return manuscriptService.searchAuthor(request);
 	}
 
 	@RequestMapping("/submission/submit")
-	public SubmitSubmissionResponse save(@RequestBody SubmitSubmissionRequest request) {
-		return null;
+	public SubmitSubmissionResponse submit(@RequestBody SubmitSubmissionRequest request) {
+		return manuscriptService.submit(request);
 	}
 
 }

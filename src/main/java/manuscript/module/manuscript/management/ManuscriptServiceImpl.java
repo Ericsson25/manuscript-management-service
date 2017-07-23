@@ -1,6 +1,7 @@
 package manuscript.module.manuscript.management;
 
 import java.io.File;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,8 +9,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import manuscript.module.manuscript.management.bean.Author;
 import manuscript.module.manuscript.management.bean.CheckSubmissionExistence;
-import manuscript.module.manuscript.management.bean.Role;
 import manuscript.module.manuscript.management.bean.SubmissionStatus;
 import manuscript.module.manuscript.management.exception.FileUploadException;
 import manuscript.module.manuscript.management.exception.SaveSubmissionException;
@@ -18,12 +19,20 @@ import manuscript.module.manuscript.management.preload.reply.ManuscriptPreloadRe
 import manuscript.module.manuscript.management.request.RemoveSubmissionRequest;
 import manuscript.module.manuscript.management.request.SaveSubmissionDataRequest;
 import manuscript.module.manuscript.management.request.SaveSubmissionRequest;
+import manuscript.module.manuscript.management.request.SearchAuthorRequest;
+import manuscript.module.manuscript.management.request.SubmitSubmissionRequest;
 import manuscript.module.manuscript.management.response.AuthorPreloadResponse;
 import manuscript.module.manuscript.management.response.EditorPreloadResponse;
 import manuscript.module.manuscript.management.response.FileUploadResponse;
 import manuscript.module.manuscript.management.response.RemoveSubmissionResponse;
 import manuscript.module.manuscript.management.response.ReviewerPreloadResponse;
 import manuscript.module.manuscript.management.response.SaveSubmissionDataResponse;
+import manuscript.module.manuscript.management.response.SearchAuthorResponse;
+import manuscript.module.manuscript.management.response.SubmitSubmissionResponse;
+import manuscript.module.user.management.bean.Roles;
+import manuscript.module.user.management.bean.SearchUser;
+import manuscript.module.user.management.bean.User;
+import manuscript.module.user.management.searchuser.SearchUserService;
 import manuscript.system.security.bean.AuthenticatedUser;
 
 @Service
@@ -33,27 +42,29 @@ public class ManuscriptServiceImpl implements ManuscriptService {
 
 	private FileManager fileManager;
 	private ManuscriptDao manuscriptDao;
+	private SearchUserService searchUserService;
 
-	public ManuscriptServiceImpl(FileManager fileManager, ManuscriptDao manuscriptDao) {
+	public ManuscriptServiceImpl(FileManager fileManager, ManuscriptDao manuscriptDao, SearchUserService searchUserService) {
 		this.fileManager = fileManager;
 		this.manuscriptDao = manuscriptDao;
+		this.searchUserService = searchUserService;
 	}
 
 	@Override
-	public ManuscriptPreloadReply<?> preload(Role role) {
-		if (role.equals(Role.AUTHOR_ROLE)) {
+	public ManuscriptPreloadReply<?> preload(Roles role) {
+		if (role.equals(Roles.AUTHOR_ROLE)) {
 
 			ManuscriptPreloadReply<AuthorPreloadResponse> reply = new ManuscriptPreloadReply<AuthorPreloadResponse>();
 			reply.setPreloadReply(authorPreload());
 			return reply;
 
-		} else if (role.equals(Role.REVIEWER_ROLE)) {
+		} else if (role.equals(Roles.REVIEWER_ROLE)) {
 
 			ManuscriptPreloadReply<ReviewerPreloadResponse> reply = new ManuscriptPreloadReply<ReviewerPreloadResponse>();
 			reply.setPreloadReply(reviewerPreload());
 			return reply;
 
-		} else if (role.equals(Role.EDITOR_ROLE)) {
+		} else if (role.equals(Roles.EDITOR_ROLE)) {
 
 			ManuscriptPreloadReply<EditorPreloadResponse> reply = new ManuscriptPreloadReply<EditorPreloadResponse>();
 			reply.setPreloadReply(editorPreload());
@@ -161,4 +172,34 @@ public class ManuscriptServiceImpl implements ManuscriptService {
 		return response;
 	}
 
+	@Override
+	public SubmitSubmissionResponse submit(SubmitSubmissionRequest request) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public SearchAuthorResponse searchAuthor(SearchAuthorRequest request) {
+		SearchAuthorResponse response = new SearchAuthorResponse();
+
+		SearchUser searchUser = new SearchUser();
+		searchUser.setEmail(request.getEmail());
+		searchUser.setFirstName(request.getFirstName());
+		searchUser.setLastName(request.getLastName());
+		searchUser.setRole(Roles.AUTHOR_ROLE);
+		List<User> users = searchUserService.searchUsers(searchUser);
+
+		if (!users.isEmpty()) {
+			for (User user : users) {
+				Author author = new Author();
+				author.setEmail(user.getEmail());
+				author.setFirstName(user.getFirstName());
+				author.setLastName(user.getLastName());
+				author.setUserId(user.getUserId());
+				response.getAuthors().add(author);
+			}
+		}
+
+		return response;
+	}
 }
