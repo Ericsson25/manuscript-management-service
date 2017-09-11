@@ -12,9 +12,11 @@ import org.springframework.web.multipart.MultipartFile;
 import manuscript.module.manuscript.management.bean.Author;
 import manuscript.module.manuscript.management.bean.CheckSubmissionExistence;
 import manuscript.module.manuscript.management.bean.SubmissionStatus;
+import manuscript.module.manuscript.management.bean.SubmitLifecycle;
 import manuscript.module.manuscript.management.exception.FileUploadException;
 import manuscript.module.manuscript.management.exception.SaveSubmissionException;
 import manuscript.module.manuscript.management.fileupload.FileManager;
+import manuscript.module.manuscript.management.lifecycle.ManuscriptLifecycle;
 import manuscript.module.manuscript.management.preload.reply.ManuscriptPreloadReply;
 import manuscript.module.manuscript.management.request.RemoveSubmissionRequest;
 import manuscript.module.manuscript.management.request.SaveSubmissionDataRequest;
@@ -43,11 +45,14 @@ public class ManuscriptServiceImpl implements ManuscriptService {
 	private FileManager fileManager;
 	private ManuscriptDao manuscriptDao;
 	private SearchUserService searchUserService;
+	private ManuscriptLifecycle manuscriptLifecycle;
 
-	public ManuscriptServiceImpl(FileManager fileManager, ManuscriptDao manuscriptDao, SearchUserService searchUserService) {
+	public ManuscriptServiceImpl(FileManager fileManager, ManuscriptDao manuscriptDao, SearchUserService searchUserService,
+			ManuscriptLifecycle manuscriptLifecycle) {
 		this.fileManager = fileManager;
 		this.manuscriptDao = manuscriptDao;
 		this.searchUserService = searchUserService;
+		this.manuscriptLifecycle = manuscriptLifecycle;
 	}
 
 	@Override
@@ -174,7 +179,13 @@ public class ManuscriptServiceImpl implements ManuscriptService {
 
 	@Override
 	public SubmitSubmissionResponse submit(SubmitSubmissionRequest request) {
-		// TODO Auto-generated method stub
+
+		SubmitLifecycle lifecycle = new SubmitLifecycle();
+		lifecycle.setSubmission(request.getSubmission());
+		lifecycle.setNewStatus(SubmissionStatus.SUBMITTED);
+
+		manuscriptLifecycle.lifecycle(lifecycle);
+
 		return null;
 	}
 
